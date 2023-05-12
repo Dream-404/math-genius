@@ -11,6 +11,8 @@ export default function App() {
   const [wrongAnswer, setWrongAnswer] = useState(0);
   const [answer, setAnswer] = useState(null);
   const [highestScore, setHighestScore] = useState(0);
+  const [showStartApp, setShowStartApp] = useState(true);
+  const [showMainApp, setShowMainApp] = useState(false);
 
   // initialize math problem by calling generateProblem() function with no dependency
   useEffect(() => {
@@ -43,7 +45,9 @@ export default function App() {
   // reduce the time from 6s to 0s
   useEffect(() => {
     const timeInterval = setInterval(() => {
-      setCounter((prevCounter) => prevCounter - 1);
+      if (showMainApp === true) {
+        setCounter((prevCounter) => prevCounter - 1);
+      }
     }, 1000);
     if (counter < 0) {
       clearInterval(timeInterval);
@@ -99,6 +103,8 @@ export default function App() {
     setScore(0);
     generateProblem();
     setCounter(6);
+    setShowStartApp(false);
+    setShowMainApp(true);
   }
 
   // if counter equal to 0 the game is over
@@ -115,32 +121,45 @@ export default function App() {
   }
 
   return (
-    <div className="mainApp">
-      <h1 className="mainHeading">Let's explore your Mind</h1>
-      <h1>Your highest score : {highestScore}</h1>
-      <h2 className="counter" id="counter">
-        Time : {counter}s
-      </h2>
-      <p className="problem" id="problem">
-        {num1} {operator} {num2} = {answer}
-      </p>
-      <h3 className="score" id="scores">
-        Current Score : {score}
-      </h3>
-      <button
-        className="correctBtn btn"
-        onClick={() => checkAnswer(answer === correctAnswer)}
-        id="correct"
-      >
-        Correct
-      </button>
-      <button
-        className="wrongBtn btn"
-        onClick={() => checkAnswer(answer !== correctAnswer)}
-        id="wrong"
-      >
-        Wrong
-      </button>
-    </div>
+    <>
+      {showStartApp && (
+        <div className="startApp">
+          <h1>Let play</h1>
+          <button className="btn" onClick={restartGame}>
+            Play
+          </button>
+        </div>
+      )}
+
+      {showMainApp && (
+        <div className="mainApp">
+          <h1 className="mainHeading">Let's explore your Mind</h1>
+          <h1>Your highest score : {highestScore}</h1>
+          <h2 className="counter" id="counter">
+            Time : {counter}s
+          </h2>
+          <p className="problem" id="problem">
+            {num1} {operator} {num2} = {answer}
+          </p>
+          <h3 className="score" id="scores">
+            Current Score : {score}
+          </h3>
+          <button
+            className="correctBtn btn"
+            onClick={() => checkAnswer(answer === correctAnswer)}
+            id="correct"
+          >
+            Correct
+          </button>
+          <button
+            className="wrongBtn btn"
+            onClick={() => checkAnswer(answer !== correctAnswer)}
+            id="wrong"
+          >
+            Wrong
+          </button>
+        </div>
+      )}
+    </>
   );
 }

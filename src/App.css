@@ -1,5 +1,6 @@
 .mainApp,
-.mainRestartApp {
+.mainRestartApp,
+.startApp {
     text-align: center;
     margin-top: 10%;
     user-select: none;
