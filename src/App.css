@@ -1,4 +1,11 @@
-.mainApp {
+.mainApp,
+.mainRestartApp {
     text-align: center;
     margin-top: 10%;
+    user-select: none;
+}
+
+.btn {
+    padding: 10px 15px;
+    border-radius: 10px;
 }

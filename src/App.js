@@ -6,10 +6,11 @@ export default function App() {
   const [num2, setNum2] = useState(0);
   const [operator, setOperator] = useState(null);
   const [score, setScore] = useState(0);
-  const [counter, setCounter] = useState(5);
+  const [counter, setCounter] = useState(6);
   const [correctAnswer, setCorrectAnswer] = useState(0);
   const [wrongAnswer, setWrongAnswer] = useState(0);
   const [answer, setAnswer] = useState(null);
+  const [highestScore, setHighestScore] = useState(0);
 
   // initialize math problem by calling generateProblem() function with no dependency
   useEffect(() => {
@@ -21,21 +22,33 @@ export default function App() {
     if (answer === correctAnswer || answer === wrongAnswer) {
       generateProblem();
     } else {
-      setScore((prevScore) => prevScore - 1);
+      setCounter((pervCounter) => pervCounter - 3);
     }
   }, [answer]);
 
-  // reduce the time from 5s to 0s
+  // useEffect to check for the higheset score for the user
+  // and compare the score and hightest score by using local storage section
+  useEffect(() => {
+    const storedHighestScore = parseInt(localStorage.getItem("score"));
+    // localStorage.setItem("score", highestScore.toString());
+    if (!isNaN(storedHighestScore)) {
+      setHighestScore(storedHighestScore);
+    }
+    if (score > storedHighestScore) {
+      setHighestScore(score);
+      localStorage.setItem("score", score.toString());
+    }
+  }, [score]);
+
+  // reduce the time from 6s to 0s
   useEffect(() => {
     const timeInterval = setInterval(() => {
       setCounter((prevCounter) => prevCounter - 1);
     }, 1000);
-    if (counter === 0) {
-      setScore((prevScore) => prevScore - 1);
+    if (counter < 0) {
       clearInterval(timeInterval);
-      setCounter(5);
+      // setCounter(6);
     }
-
     return () => {
       clearInterval(timeInterval);
     };
@@ -73,26 +86,30 @@ export default function App() {
   // callback function to check the answer and increase or decrease the score depend on the condition
   function checkAnswer(isCorrect) {
     if (isCorrect) {
-      setScore((prevScore) => prevScore + 1);
+      setCounter((prevCounter) => prevCounter + 3);
       generateProblem();
-      setCounter(5);
+      setScore((prevScore) => prevScore + 1);
     } else {
-      setScore((prevScore) => prevScore - 1);
-      setCounter(5);
+      setCounter((prevCounter) => prevCounter - 3);
     }
   }
 
+  // restart function
   function restartGame() {
     setScore(0);
     generateProblem();
-    setCounter(5);
+    setCounter(6);
   }
 
-  if (score < 0) {
+  // if counter equal to 0 the game is over
+  if (counter < 0) {
     return (
-      <div>
-        <div>Your loose the game</div>
-        <button onClick={restartGame}>Retry</button>
+      <div className="mainRestartApp">
+        <h1>Your loose the game</h1>
+        <h2>Let try the challanges again!</h2>
+        <button className="btn" onClick={restartGame}>
+          Retry
+        </button>
       </div>
     );
   }
@@ -100,6 +117,7 @@ export default function App() {
   return (
     <div className="mainApp">
       <h1 className="mainHeading">Let's explore your Mind</h1>
+      <h1>Your highest score : {highestScore}</h1>
       <h2 className="counter" id="counter">
         Time : {counter}s
       </h2>
@@ -107,17 +125,17 @@ export default function App() {
         {num1} {operator} {num2} = {answer}
       </p>
       <h3 className="score" id="scores">
-        Your score : {score}
+        Current Score : {score}
       </h3>
       <button
-        className="correctBtn"
+        className="correctBtn btn"
         onClick={() => checkAnswer(answer === correctAnswer)}
         id="correct"
       >
         Correct
       </button>
       <button
-        className="wrongBtn"
+        className="wrongBtn btn"
         onClick={() => checkAnswer(answer !== correctAnswer)}
         id="wrong"
       >
