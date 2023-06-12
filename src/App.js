@@ -2,61 +2,70 @@ import React, { useState, useEffect } from "react";
 import "./app.css";
 export default function App() {
   // declare the state that going to use in this react app
-  const [num1, setNum1] = useState(0);
-  const [num2, setNum2] = useState(0);
-  const [operator, setOperator] = useState(null);
-  const [score, setScore] = useState(0);
-  const [counter, setCounter] = useState(6);
-  const [correctAnswer, setCorrectAnswer] = useState(0);
-  const [wrongAnswer, setWrongAnswer] = useState(0);
-  const [answer, setAnswer] = useState(null);
-  const [highestScore, setHighestScore] = useState(0);
-  const [showStartApp, setShowStartApp] = useState(true);
-  const [showMainApp, setShowMainApp] = useState(false);
+  const [state, setState] = useState({
+    num1: 0,
+    num2: 0,
+    operator: null,
+    score: 0,
+    counter: 6,
+    correctAnswer: 0,
+    wrongAnswer: 0,
+    answer: null,
+    highestScore: 0,
+    showStartApp: true,
+    showMainApp: false,
+  });
 
-  // initialize math problem by calling generateProblem() function with no dependency
   useEffect(() => {
     generateProblem();
   }, []);
 
-  // call generateProblem() function when answer is change by checking condition
   useEffect(() => {
-    if (answer === correctAnswer || answer === wrongAnswer) {
+    if (
+      state.answer === state.correctAnswer ||
+      state.answer === state.wrongAnswer
+    ) {
       generateProblem();
     } else {
-      setCounter((pervCounter) => pervCounter - 3);
+      setState((prevState) => ({
+        ...prevState,
+        counter: prevState.counter - 3,
+      }));
     }
-  }, [answer]);
+  }, [state.answer]);
 
-  // useEffect to check for the higheset score for the user
-  // and compare the score and hightest score by using local storage section
   useEffect(() => {
     const storedHighestScore = parseInt(localStorage.getItem("score"));
-    // localStorage.setItem("score", highestScore.toString());
     if (!isNaN(storedHighestScore)) {
-      setHighestScore(storedHighestScore);
+      setState((prevState) => ({
+        ...prevState,
+        highestScore: storedHighestScore,
+      }));
     }
-    if (score > storedHighestScore) {
-      setHighestScore(score);
-      localStorage.setItem("score", score.toString());
+    if (state.score > storedHighestScore) {
+      setState((prevState) => ({ ...prevState, highestScore: state.score }));
+      localStorage.setItem("score", state.score.toString());
     }
-  }, [score]);
+  }, [state.score]);
 
-  // reduce the time from 6s to 0s
   useEffect(() => {
     const timeInterval = setInterval(() => {
-      if (showMainApp === true) {
-        setCounter((prevCounter) => prevCounter - 1);
+      if (state.showMainApp === true) {
+        setState((prevState) => ({
+          ...prevState,
+          counter: prevState.counter - 1,
+        }));
       }
     }, 1000);
-    if (counter < 0) {
+
+    if (state.counter < 0) {
       clearInterval(timeInterval);
-      // setCounter(6);
     }
+
     return () => {
       clearInterval(timeInterval);
     };
-  }, [counter]);
+  }, [state.counter]);
 
   // function that generate states for the math problem
   function generateProblem() {
@@ -67,12 +76,15 @@ export default function App() {
     const newWrongAnswer = newCorrectAnswer + Math.ceil(Math.random() * 6);
     const newAnswer = Math.random() < 0.5 ? newCorrectAnswer : newWrongAnswer;
 
-    setNum1(newNum1);
-    setNum2(newNum2);
-    setOperator(newOperator);
-    setCorrectAnswer(newCorrectAnswer);
-    setWrongAnswer(newWrongAnswer);
-    setAnswer(newAnswer);
+    setState((prevState) => ({
+      ...prevState,
+      num1: newNum1,
+      num2: newNum2,
+      operator: newOperator,
+      correctAnswer: newCorrectAnswer,
+      wrongAnswer: newWrongAnswer,
+      answer: newAnswer,
+    }));
   }
 
   // function that choose operator
@@ -90,29 +102,38 @@ export default function App() {
   // callback function to check the answer and increase or decrease the score depend on the condition
   function checkAnswer(isCorrect) {
     if (isCorrect) {
-      setCounter((prevCounter) => prevCounter + 3);
+      setState((prevState) => ({
+        ...prevState,
+        counter: prevState.counter + 3,
+        score: prevState.score + 1,
+      }));
       generateProblem();
-      setScore((prevScore) => prevScore + 1);
     } else {
-      setCounter((prevCounter) => prevCounter - 3);
+      setState((prevState) => ({
+        ...prevState,
+        counter: prevState.counter - 3,
+      }));
     }
   }
 
   // restart function
   function restartGame() {
-    setScore(0);
+    setState((prevState) => ({
+      ...prevState,
+      score: 0,
+      counter: 6,
+      showStartApp: false,
+      showMainApp: true,
+    }));
     generateProblem();
-    setCounter(6);
-    setShowStartApp(false);
-    setShowMainApp(true);
   }
 
   // if counter equal to 0 the game is over
-  if (counter < 0) {
+  if (state.counter < 0) {
     return (
       <div className="mainRestartApp">
-        <h1>Your loose the game</h1>
-        <h2>Let try the challanges again!</h2>
+        <h1>You lose the game</h1>
+        <h2>Let's try the challenges again!</h2>
         <button className="btn" onClick={restartGame}>
           Retry
         </button>
@@ -122,38 +143,38 @@ export default function App() {
 
   return (
     <>
-      {showStartApp && (
+      {state.showStartApp && (
         <div className="startApp">
-          <h1>Let play</h1>
+          <h1>Let's play</h1>
           <button className="btn" onClick={restartGame}>
             Play
           </button>
         </div>
       )}
 
-      {showMainApp && (
+      {state.showMainApp && (
         <div className="mainApp">
-          <h1 className="mainHeading">Let's explore your Mind</h1>
-          <h1>Your highest score : {highestScore}</h1>
+          <h1 className="mainHeading">Let's explore your mind</h1>
+          <h1>Your highest score: {state.highestScore}</h1>
           <h2 className="counter" id="counter">
-            Time : {counter}s
+            Time: {state.counter}s
           </h2>
           <p className="problem" id="problem">
-            {num1} {operator} {num2} = {answer}
+            {state.num1} {state.operator} {state.num2} = {state.answer}
           </p>
           <h3 className="score" id="scores">
-            Current Score : {score}
+            Current Score: {state.score}
           </h3>
           <button
             className="correctBtn btn"
-            onClick={() => checkAnswer(answer === correctAnswer)}
+            onClick={() => checkAnswer(state.answer === state.correctAnswer)}
             id="correct"
           >
             Correct
           </button>
           <button
             className="wrongBtn btn"
-            onClick={() => checkAnswer(answer !== correctAnswer)}
+            onClick={() => checkAnswer(state.answer !== state.correctAnswer)}
             id="wrong"
           >
             Wrong
